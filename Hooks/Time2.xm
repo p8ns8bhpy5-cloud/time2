@@ -218,8 +218,8 @@ static NSDictionary<NSNumber *, NSNumber *> *variationAxes(CGFloat height) {
     NSMutableDictionary<NSNumber *, NSNumber *> *d = [NSMutableDictionary dictionary];
     d[@(2003265652)] = @(clampFloat(gFontWeight, 1, 1000));           // wght
     d[@(2003072104)] = @(clampFloat(gFontWidth, 60, 100));             // wdth（只能收窄 60-100）
-    d[@(1214516308)] = @(clampFloat(height, 100, 500));               // HGHT
-    d[@(1399874132)] = @(clampFloat(gFontSoftness, 0, 100));          // SOFT
+    d[@(1212631124)] = @(clampFloat(height, 100, 500));               // HGHT（正确轴标识符）
+    d[@(1397704276)] = @(clampFloat(gFontSoftness, 0, 100));           // SOFT（正确轴标识符）
     return d;
 }
 
@@ -857,10 +857,9 @@ static void relayoutViews(void) {
     gBlurBackdrop.frame = gGlassHost.bounds;
     gTintView.frame = gGlassHost.bounds;
 
-    // 纵向缩放：字体高度滑杆（100-500）控制纵向拉伸比例
-    // 100=正常高度，500=最高（约1.5倍高），宽度不变，只拉长高度
-    // 注意：transform 要在 center 设置之后应用，否则中心会偏移
-    CGFloat scaleY = 1.0 + (gFontHeight - 100.0) / 400.0 * 0.5;
+    // 纵向缩放：去掉 transform 拉伸（会导致字体变形）
+    // 改用字体 HGHT 轴本身来控制高度，先确认轴效果
+    CGFloat scaleY = 1.0;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
     gGlassHost.transform = CGAffineTransformMakeScale(1.0, scaleY);
 
