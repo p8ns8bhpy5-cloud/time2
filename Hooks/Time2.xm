@@ -857,10 +857,9 @@ static void relayoutViews(void) {
     gBlurBackdrop.frame = gGlassHost.bounds;
     gTintView.frame = gGlassHost.bounds;
 
-    // 纵向缩放：字体高度滑杆（100-500）控制纵向拉伸比例
-    // 100=正常高度，500=最高（约2倍高），避免过度拉伸变形
-    // 注意：transform 要在 center 设置之后应用，否则中心会偏移
-    CGFloat scaleY = 1.0 + (gFontHeight - 100.0) / 400.0;
+    // 纵向缩放：暂时去掉 transform 拉伸（会导致字体变形）
+    // 改用字体 HGHT 轴本身来控制高度，等确认轴效果后再调整
+    CGFloat scaleY = 1.0;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
     gGlassHost.transform = CGAffineTransformMakeScale(1.0, scaleY);
 
