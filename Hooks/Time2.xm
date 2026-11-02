@@ -762,39 +762,7 @@ static void measureNearestCardTop(void) {
 // 高度轴固定用用户设定的值，回缩用 transform scaleY 挤压，不重新创建字体
 // 这样就不会卡顿了
 static CGFloat currentHeightAxis(void) { return gFontHeight; }
-
-// 字体缓存：只有当字体参数变化时才重新创建
-static UIFont *gCachedFont = nil;
-static CGFloat gCachedFontHeight = -1;
-static CGFloat gCachedFontSize = -1;
-static CGFloat gCachedFontWeight = -1;
-static CGFloat gCachedFontWidth = -1;
-static CGFloat gCachedFontSoftness = -1;
-
-static UIFont *currentClockFont(void) {
-    CGFloat height = gFontHeight;
-    CGFloat size = kBaseClockSize * gSizeScale;
-    
-    // 检查缓存是否有效
-    if (gCachedFont &&
-        gCachedFontHeight == height &&
-        gCachedFontSize == size &&
-        gCachedFontWeight == gFontWeight &&
-        gCachedFontWidth == gFontWidth &&
-        gCachedFontSoftness == gFontSoftness) {
-        return gCachedFont;
-    }
-    
-    // 缓存无效，重新创建字体
-    UIFont *f = clockFontWithHeight(height);
-    gCachedFont = f;
-    gCachedFontHeight = height;
-    gCachedFontSize = size;
-    gCachedFontWeight = gFontWeight;
-    gCachedFontWidth = gFontWidth;
-    gCachedFontSoftness = gFontSoftness;
-    return f;
-}
+static UIFont *currentClockFont(void) { return clockFontWithHeight(currentHeightAxis()); }
 
 // 计算目标收缩量：卡片顶部进入时钟下沿上方 220pt 避让带，越往上 t 越大
 static void updateTargetShrink(void) {
