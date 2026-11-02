@@ -859,9 +859,11 @@ static void relayoutViews(void) {
 
     // 纵向缩放：
     // 1. 基础高度：完全用 HGHT 轴本身，不用 transform 补充（不变形）
-    // 2. 回缩挤压：gShrink 0→1 时，纵向压扁 30%（用 transform，不重新创建字体，不卡顿）
+    // 2. 回缩挤压：gShrink 0→1 时，从正常高度压缩到最小高度（HGHT=100）
+    //    这样就可以完全压扁，而不是只压扁 30%
     CGFloat baseScaleY = 1.0; // 完全靠 HGHT 轴，不用 transform 补充
-    CGFloat shrinkScaleY = 1.0 - gShrink * 0.3; // gShrink=1 时压扁 30%
+    CGFloat minScaleY = 100.0 / gFontHeight; // gShrink=1 时，压缩到最小高度
+    CGFloat shrinkScaleY = 1.0 - gShrink * (1.0 - minScaleY); // 从 1.0 渐变到 minScaleY
     CGFloat scaleY = baseScaleY * shrinkScaleY;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
     gGlassHost.transform = CGAffineTransformMakeScale(1.0, scaleY);
