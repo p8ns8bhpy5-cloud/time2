@@ -1,0 +1,75 @@
+name: Build Time2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: write
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+  THEOS: ${{ github.workspace }}/theos-roothide
+
+jobs:
+  build:
+    runs-on: macos-15
+    outputs:
+      package_version: ${{ steps.bump.outputs.package_version }}
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4'
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Environment
+        run: |
+          echo "$THEOS/bin" >> "$GITHUB_PATH"
+          echo "THEOS=$THEOS" >> "$GITHUB_ENV"
+          echo "THEOS_IGNORE_PARALLEL_BUILDING_NOTICE=yes" >> "$HOME/.theosrc"
+
+      - id: bump
+        run: |
+          VERSION="1.0.0-${{ github.run_number }}"
+          sed -i '' "s/^Version: .*/Version: ${VERSION}/" control
+          echo "package_version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: roothide/theos
+          path: theos-roothide
+          submodules: recursive
+
+      - name: Install SDK
+        run: |
+          mkdir -p "$THEOS/sdks"
+          STAGE="$(mktemp -d)"; trap 'rm -rf "$STAGE"' EXIT
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git "$STAGE/sdks"
+          git -C "$STAGE/sdks" sparse-checkout set iPhoneOS16.5.sdk
+          cp -R "$STAGE/sdks/iPhoneOS16.5.sdk" "$THEOS/sdks/"
+
+      - name: Install deps
+        run: |
+          brew install ldid dpkg xz
+          echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+
+      - name: Build
+        run: |
+          sh build.sh rootless
+          find ./packages -name "*.deb"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-rootless
+          path: ./packages/*.deb
+          if-no-files-found: error
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ github.token }}
+          tag_name: v${{ steps.bump.outputs.package_version }}
+          name: Time2 v${{ steps.bump.outputs.package_version }}
+          files: ./packages/*.deb
