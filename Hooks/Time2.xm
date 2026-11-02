@@ -860,14 +860,14 @@ static void syncClockPosition(void) {
         centerY = containerH * 0.30 + gClockOffsetY;
     }
     
-    // 当 gFontHeight > 500 时，字号放大，向上对齐，这样字体看起来就是向上拉长的，而不是整体变大
+    // 当 gFontHeight > 500 时，字号放大，向下对齐，这样字体看起来就是向下拉长的，而不是整体变大
     CGFloat heightScale = fmax(1.0, gFontHeight / 500.0);
     if (heightScale > 1.0) {
-        // 向上对齐：底部位置不变，顶部向上延伸
+        // 向下对齐：顶部位置不变，底部向下延伸
         CGFloat originalCenterY = centerY;
-        // 字体高度大约是字号的 1.2 倍，所以向上偏移 (heightScale-1) * 字体高度 / 2
+        // 字体高度大约是字号的 1.2 倍，所以向下偏移 (heightScale-1) * 字体高度 / 2
         CGFloat offsetY = (heightScale - 1.0) * 100.0; // 估算值，大概是字体高度的一半
-        centerY = originalCenterY - offsetY;
+        centerY = originalCenterY + offsetY;
     }
     
     centerY = MAX(containerH * 0.08, MIN(containerH * 0.72, centerY));
