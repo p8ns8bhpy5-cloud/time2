@@ -857,9 +857,10 @@ static void relayoutViews(void) {
     gBlurBackdrop.frame = gGlassHost.bounds;
     gTintView.frame = gGlassHost.bounds;
 
-    // 纵向缩放：字体高度滑杆（100-500）控制纵向拉伸比例，100=正常，500=拉长5倍
+    // 纵向缩放：字体高度滑杆（100-500）控制纵向拉伸比例
+    // 100=正常高度，500=最高（约2倍高），避免过度拉伸变形
     // 注意：transform 要在 center 设置之后应用，否则中心会偏移
-    CGFloat scaleY = gFontHeight / 100.0;
+    CGFloat scaleY = 1.0 + (gFontHeight - 100.0) / 400.0;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
     gGlassHost.transform = CGAffineTransformMakeScale(1.0, scaleY);
 
@@ -887,15 +888,11 @@ static void relayoutViews(void) {
         return;
     }
 
-    // 染色 alpha：按深浅模式选择浅色 / 深色染色值
-    BOOL dark;
-    if ([gTintMode isEqualToString:@"light"]) dark = NO;
-    else if ([gTintMode isEqualToString:@"dark"]) dark = YES;
-    else dark = (gContainer.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark);
-    gTintView.alpha = dark ? gDarkTint : gLightTint;
+    // 染色层固定为白色磨砂玻璃效果，不管深浅模式
+    // 用户想要的是白色磨砂玻璃字体，不是黑色
+    gTintView.alpha = gLightTint;
     gTintView.hidden = NO;
-    gTintView.backgroundColor = dark ? [UIColor colorWithWhite:0.1 alpha:1.0]
-                                     : [UIColor whiteColor];
+    gTintView.backgroundColor = [UIColor whiteColor];
 }
 
 // ===================== 样式应用（必须主线程；从磁盘读盘只在这里与 DisplayLink 状态切换时调用） =====================
