@@ -759,9 +759,9 @@ static void measureNearestCardTop(void) {
     gNearestCardTopY = bestTop;
 }
 
-// 由当前收缩量推导目标高度轴；回缩只覆盖 HGHT，字号倍率 / 宽度 / 透明度不随 gShrink 改变。
-// 压扁下限为轴最小值 100（clampFloat 已在 variationAxes 内复核）。
-static CGFloat currentHeightAxis(void) { return gFontHeight + (100.0 - gFontHeight) * gShrink; }
+// 高度轴固定用用户设定的值，回缩用 transform scaleY 挤压，不重新创建字体
+// 这样就不会卡顿了
+static CGFloat currentHeightAxis(void) { return gFontHeight; }
 static UIFont *currentClockFont(void) { return clockFontWithHeight(currentHeightAxis()); }
 
 // 计算目标收缩量：卡片顶部进入时钟下沿上方 220pt 避让带，越往上 t 越大
@@ -857,11 +857,14 @@ static void relayoutViews(void) {
     gBlurBackdrop.frame = gGlassHost.bounds;
     gTintView.frame = gGlassHost.bounds;
 
-    // 纵向缩放：HGHT 轴最大 500，超过 500 的部分用轻微 transform 补充
-    // 这样用户可以拉得更长，同时不会太变形
+    // 纵向缩放：
+    // 1. 基础高度：HGHT 轴最大 500，超过 500 的部分用轻微 transform 补充
+    // 2. 回缩挤压：gShrink 0→1 时，纵向压扁 30%（用 transform，不重新创建字体，不卡顿）
     CGFloat hghtValue = MIN(gFontHeight, 500.0);
     CGFloat extraScale = MAX(0.0, (gFontHeight - 500.0) / 500.0 * 0.5); // 500-1000 对应 0-0.5 倍补充
-    CGFloat scaleY = 1.0 + extraScale;
+    CGFloat baseScaleY = 1.0 + extraScale;
+    CGFloat shrinkScaleY = 1.0 - gShrink * 0.3; // gShrink=1 时压扁 30%
+    CGFloat scaleY = baseScaleY * shrinkScaleY;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
     gGlassHost.transform = CGAffineTransformMakeScale(1.0, scaleY);
 
