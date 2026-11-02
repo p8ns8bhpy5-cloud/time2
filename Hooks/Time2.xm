@@ -859,6 +859,17 @@ static void syncClockPosition(void) {
         centerX = containerW / 2.0 + gClockOffsetX;
         centerY = containerH * 0.30 + gClockOffsetY;
     }
+    
+    // 当 gFontHeight > 500 时，字号放大，向上对齐，这样字体看起来就是向上拉长的，而不是整体变大
+    CGFloat heightScale = fmax(1.0, gFontHeight / 500.0);
+    if (heightScale > 1.0) {
+        // 向上对齐：底部位置不变，顶部向上延伸
+        CGFloat originalCenterY = centerY;
+        // 字体高度大约是字号的 1.2 倍，所以向上偏移 (heightScale-1) * 字体高度 / 2
+        CGFloat offsetY = (heightScale - 1.0) * 100.0; // 估算值，大概是字体高度的一半
+        centerY = originalCenterY - offsetY;
+    }
+    
     centerY = MAX(containerH * 0.08, MIN(containerH * 0.72, centerY));
     gClockLabel.center = CGPointMake(centerX, centerY);
     gGlassHost.center = gClockLabel.center;
@@ -874,7 +885,7 @@ static void applyDynamicState(void) {
     syncClockPosition();
 
     static CGFloat lastRebuildShrink = -1.0;
-    if (fabs(gShrink - lastRebuildShrink) > 0.03) {
+    if (fabs(gShrink - lastRebuildShrink) > 0.08) {  // 提高阈值，减少重建字体频率，避免卡顿
         lastRebuildShrink = gShrink;
         relayoutViews();  // 内部按 currentClockFont 重建字体与字形遮罩
     }
