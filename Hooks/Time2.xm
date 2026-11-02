@@ -762,7 +762,39 @@ static void measureNearestCardTop(void) {
 // 高度轴固定用用户设定的值，回缩用 transform scaleY 挤压，不重新创建字体
 // 这样就不会卡顿了
 static CGFloat currentHeightAxis(void) { return gFontHeight; }
-static UIFont *currentClockFont(void) { return clockFontWithHeight(currentHeightAxis()); }
+
+// 字体缓存：只有当字体参数变化时才重新创建
+static UIFont *gCachedFont = nil;
+static CGFloat gCachedFontHeight = -1;
+static CGFloat gCachedFontSize = -1;
+static CGFloat gCachedFontWeight = -1;
+static CGFloat gCachedFontWidth = -1;
+static CGFloat gCachedFontSoftness = -1;
+
+static UIFont *currentClockFont(void) {
+    CGFloat height = gFontHeight;
+    CGFloat size = kBaseClockSize * gSizeScale;
+    
+    // 检查缓存是否有效
+    if (gCachedFont &&
+        gCachedFontHeight == height &&
+        gCachedFontSize == size &&
+        gCachedFontWeight == gFontWeight &&
+        gCachedFontWidth == gFontWidth &&
+        gCachedFontSoftness == gFontSoftness) {
+        return gCachedFont;
+    }
+    
+    // 缓存无效，重新创建字体
+    UIFont *f = clockFontWithHeight(height);
+    gCachedFont = f;
+    gCachedFontHeight = height;
+    gCachedFontSize = size;
+    gCachedFontWeight = gFontWeight;
+    gCachedFontWidth = gFontWidth;
+    gCachedFontSoftness = gFontSoftness;
+    return f;
+}
 
 // 计算目标收缩量：卡片顶部进入时钟下沿上方 220pt 避让带，越往上 t 越大
 static void updateTargetShrink(void) {
@@ -858,11 +890,13 @@ static void relayoutViews(void) {
     gTintView.frame = gGlassHost.bounds;
 
     // 纵向缩放：
-    // 1. 基础高度：完全用 HGHT 轴本身，不用 transform 补充（不变形）
-    // 2. 回缩挤压：gShrink 0→1 时，从正常高度压缩到最小高度（HGHT=100）
-    //    这样就可以完全压扁，而不是只压扁 30%
-    CGFloat baseScaleY = 1.0; // 完全靠 HGHT 轴，不用 transform 补充
-    CGFloat minScaleY = 100.0 / gFontHeight; // gShrink=1 时，压缩到最小高度
+    // 1. 基础高度：HGHT 轴最大 500（字体本身的极限，不变形）
+    // 2. 超过 500 的部分用 transform 补充（就像让系统认为分辨率很小，字体比例放大）
+    // 3. 回缩挤压：gShrink 0→1 时，从正常高度压缩到最小高度
+    CGFloat hghtValue = MIN(gFontHeight, 500.0);
+    CGFloat extraScale = MAX(0.0, (gFontHeight - 500.0) / 500.0 * 1.0); // 500-1000 对应 0-1.0 倍补充
+    CGFloat baseScaleY = 1.0 + extraScale;
+    CGFloat minScaleY = 100.0 / MAX(gFontHeight, 100.0); // gShrink=1 时，压缩到最小高度
     CGFloat shrinkScaleY = 1.0 - gShrink * (1.0 - minScaleY); // 从 1.0 渐变到 minScaleY
     CGFloat scaleY = baseScaleY * shrinkScaleY;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
