@@ -220,7 +220,7 @@ static NSDictionary<NSNumber *, NSNumber *> *variationAxes(CGFloat height) {
     
     // 自动调整 wdth 轴：当高度 > 500 时，收窄宽度，保持整体宽度不变
     // 原理：字号变大 N 倍，wdth 轴收窄 N 倍，宽度 = 字号 × wdth 轴 保持不变
-    CGFloat heightScale = MAX(1.0, gFontHeight / 500.0); // 500 以上才放大
+    CGFloat heightScale = fmax(1.0, gFontHeight / 500.0); // 500 以上才放大
     CGFloat autoWidth = gFontWidth / heightScale;
     d[@(2003072104)] = @(clampFloat(autoWidth, 60, 100));             // wdth（只能收窄 60-100）
     
@@ -512,7 +512,10 @@ static UIView *findNativeAnchor(void) {
 
     UIView *common = commonAncestorOfChains(chains);
     UIView *anchor = nil;
-    if (common && common.bounds.size.height >= screenH * 0.50) anchor = common;
+    // 优先挂在原生时间标签的 superview 上，这样图层位置更准确
+    if (timeLabel && timeLabel.superview) {
+        anchor = timeLabel.superview;
+    } else if (common && common.bounds.size.height >= screenH * 0.50) anchor = common;
     else if (timeLabel ?: firstLabel) anchor = fullscreenAncestor(timeLabel ?: firstLabel);
     if (anchor) anchor = visibleAnchor(anchor);
 
