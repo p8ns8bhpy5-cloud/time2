@@ -861,10 +861,9 @@ static void relayoutViews(void) {
     // 1. 基础高度：HGHT 轴最大 500（字体本身的极限，不变形）
     // 2. 超过 500 的部分用 transform 补充（就像让系统认为分辨率很小，字体比例放大）
     // 3. 回缩挤压：gShrink 0→1 时，从正常高度压缩到最小高度
-    CGFloat hghtValue = MIN(gFontHeight, 500.0);
-    CGFloat extraScale = MAX(0.0, (gFontHeight - 500.0) / 500.0 * 1.0); // 500-1000 对应 0-1.0 倍补充
+    CGFloat extraScale = fmax(0.0, (gFontHeight - 500.0) / 500.0 * 1.0); // 500-1000 对应 0-1.0 倍补充
     CGFloat baseScaleY = 1.0 + extraScale;
-    CGFloat minScaleY = 100.0 / MAX(gFontHeight, 100.0); // gShrink=1 时，压缩到最小高度
+    CGFloat minScaleY = 100.0 / fmax(gFontHeight, 100.0); // gShrink=1 时，压缩到最小高度
     CGFloat shrinkScaleY = 1.0 - gShrink * (1.0 - minScaleY); // 从 1.0 渐变到 minScaleY
     CGFloat scaleY = baseScaleY * shrinkScaleY;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
