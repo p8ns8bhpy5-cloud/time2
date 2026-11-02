@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>时间2</string>
+	<key>defaults</key>
+	<string>com.xiaoyu.time2</string>
+	<key>items</key>
+	<array>
+
+		<!-- 基本设置 -->
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>基本设置</string>
+			<key>footerText</key><string>关闭总开关后插件完全不生效，锁屏恢复系统原生时间；系统原生日期始终保留。</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>启用时间2</string>
+			<key>key</key><string>Enable</string>
+			<key>default</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>启用自定义时钟</string>
+			<key>key</key><string>ClockEnabled</string>
+			<key>default</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>隐藏系统原生时间</string>
+			<key>key</key><string>HideStockTime</string>
+			<key>default</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>时钟垂直偏移 (pt)</string>
+			<key>key</key><string>ClockVerticalOffset</string>
+			<key>default</key><real>0</real>
+			<key>min</key><real>-200</real>
+			<key>max</key><real>200</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>时钟水平偏移 (pt)</string>
+			<key>key</key><string>ClockHorizontalOffset</string>
+			<key>default</key><real>0</real>
+			<key>min</key><real>-200</real>
+			<key>max</key><real>200</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>帧率上限</string>
+			<key>key</key><string>FPS</string>
+			<key>default</key><real>60</real>
+			<key>min</key><real>1</real>
+			<key>max</key><real>120</real>
+			<key>showValue</key><true/>
+		</dict>
+
+		<!-- 玻璃效果（主进程可近似项；玻璃厚度/折射系数/折射强度依赖 backboardd Metal，本版隐藏） -->
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>玻璃效果</string>
+			<key>footerText</key><string>磨砂与染色只落在时钟笔画内部，不形成背景方框。玻璃厚度、折射系数、折射强度依赖独立 Metal 渲染进程，本版本暂不开放。</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>启用玻璃时钟</string>
+			<key>key</key><string>GlassEnabled</string>
+			<key>default</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>边缘宽度</string>
+			<key>key</key><string>BezelWidth</string>
+			<key>default</key><real>0.5</real>
+			<key>min</key><real>0</real>
+			<key>max</key><real>10</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>模糊强度</string>
+			<key>key</key><string>Blur</string>
+			<key>default</key><real>5.0</real>
+			<key>min</key><real>0</real>
+			<key>max</key><real>20</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>浅色染色</string>
+			<key>key</key><string>LightTintAlpha</string>
+			<key>default</key><real>0.10</real>
+			<key>min</key><real>0</real>
+			<key>max</key><real>1</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>深色染色</string>
+			<key>key</key><string>DarkTintAlpha</string>
+			<key>default</key><real>0.10</real>
+			<key>min</key><real>0</real>
+			<key>max</key><real>1</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSListItemsCell</string>
+			<key>label</key><string>深浅模式</string>
+			<key>key</key><string>TintOverrideMode</string>
+			<key>default</key><string>system</string>
+			<key>validTitles</key>
+			<array>
+				<string>跟随系统</string>
+				<string>浅色</string>
+				<string>深色</string>
+			</array>
+			<key>validValues</key>
+			<array>
+				<string>system</string>
+				<string>light</string>
+				<string>dark</string>
+			</array>
+		</dict>
+
+		<!-- 可变字体（固定内置 axs66.otf：粗细/宽度/高度/柔和走字体轴，大小为字号倍率；不提供字体选择） -->
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>字体</string>
+			<key>footerText</key><string>固定使用内置 axs66 可变字体。粗细、高度、柔和由字体轴驱动；宽度轴在该字体上只能收窄（60–100），不能拉宽；字体大小为固定基准字号的倍率。关闭“启用可变轴”时使用字体默认实例，不切换系统字体。</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>启用可变轴</string>
+			<key>key</key><string>PresetFontEnabled</string>
+			<key>default</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>字体粗细</string>
+			<key>key</key><string>FontWeight</string>
+			<key>default</key><real>400</real>
+			<key>min</key><real>1</real>
+			<key>max</key><real>1000</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>字体大小</string>
+			<key>key</key><string>SizeScale</string>
+			<key>default</key><real>1.0</real>
+			<key>min</key><real>0.5</real>
+			<key>max</key><real>3.0</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>字体宽度（收窄）</string>
+			<key>key</key><string>FontWidth</string>
+			<key>default</key><real>100</real>
+			<key>min</key><real>60</real>
+			<key>max</key><real>100</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>字体高度</string>
+			<key>key</key><string>FontHeight</string>
+			<key>default</key><real>100</real>
+			<key>min</key><real>100</real>
+			<key>max</key><real>500</real>
+			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSliderCell</string>
+			<key>label</key><string>字体柔和</string>
+			<key>key</key><string>FontSoftness</string>
+			<key>default</key><real>70</real>
+			<key>min</key><real>0</real>
+			<key>max</key><real>100</real>
+			<key>showValue</key><true/>
+		</dict>
+
+		<!-- 回缩联动：通知 / 播放器卡片逼近时只下压字体高度轴把数字纵向压扁，不缩字号、不变淡、不移动位置；离开后高度轴平滑回弹（仿 iOS26 原生锁屏时间） -->
+
+		<!-- 关于我们 -->
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>关于我们</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>在 Sileo 中查看</string>
+			<key>action</key><string>openSileo:</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>Telegram 频道</string>
+			<key>action</key><string>openTelegram:</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>QQ 交流群</string>
+			<key>action</key><string>openQQ:</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>重新加载</string>
+			<key>action</key><string>respring:</string>
+		</dict>
+
+	</array>
+</dict>
+</plist>
