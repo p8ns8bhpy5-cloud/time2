@@ -200,7 +200,7 @@
 		</dict>
 		<dict>
 			<key>cell</key><string>PSButtonCell</string>
-			<key>label</key><string>字体纵向高度，越大越高越细长（500以内是字体本身，500以上是比例放大）</string>
+			<key>label</key><string>字体纵向高度，越大越高越细长（500以内是字体本身，500以上自动放大字号+收窄宽度）</string>
 			<key>action</key><string>noop:</string>
 		</dict>
 		<dict>
