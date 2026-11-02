@@ -217,7 +217,13 @@ static CFAbsoluteTime gLastCardScan = 0;             // 卡片测量节流时间
 static NSDictionary<NSNumber *, NSNumber *> *variationAxes(CGFloat height) {
     NSMutableDictionary<NSNumber *, NSNumber *> *d = [NSMutableDictionary dictionary];
     d[@(2003265652)] = @(clampFloat(gFontWeight, 1, 1000));           // wght
-    d[@(2003072104)] = @(clampFloat(gFontWidth, 60, 100));             // wdth（只能收窄 60-100）
+    
+    // 自动调整 wdth 轴：当高度 > 500 时，收窄宽度，保持整体宽度不变
+    // 原理：字号变大 N 倍，wdth 轴收窄 N 倍，宽度 = 字号 × wdth 轴 保持不变
+    CGFloat heightScale = MAX(1.0, gFontHeight / 500.0); // 500 以上才放大
+    CGFloat autoWidth = gFontWidth / heightScale;
+    d[@(2003072104)] = @(clampFloat(autoWidth, 60, 100));             // wdth（只能收窄 60-100）
+    
     d[@(1212631124)] = @(clampFloat(height, 100, 500));               // HGHT（正确轴标识符）
     d[@(1397704276)] = @(clampFloat(gFontSoftness, 0, 100));           // SOFT（正确轴标识符）
     return d;
@@ -279,7 +285,10 @@ static UIFont *uifontFromCTFont(CTFontRef ct, CGFloat size) {
 
 // height：HGHT 轴目标值（回缩下压该轴）；字号恒为 固定基准 pt × 大小倍率，不另乘收缩系数。
 static UIFont *clockFontWithHeight(CGFloat height) {
-    CGFloat size = kBaseClockSize * gSizeScale;
+    // 自动调整字号：当高度 > 500 时，放大字号，同时收窄宽度（在 variationAxes 里处理）
+    // 这样宽度保持不变，高度增加
+    CGFloat heightScale = MAX(1.0, gFontHeight / 500.0); // 500 以上才放大
+    CGFloat size = kBaseClockSize * gSizeScale * heightScale;
 
     CTFontRef ct = buildCustomCTFont(kTime2BuiltinFontFile, size, height);
     if (ct) {
@@ -759,9 +768,13 @@ static void measureNearestCardTop(void) {
     gNearestCardTopY = bestTop;
 }
 
-// 高度轴固定用用户设定的值，回缩用 transform scaleY 挤压，不重新创建字体
-// 这样就不会卡顿了
-static CGFloat currentHeightAxis(void) { return gFontHeight; }
+// 由当前收缩量推导目标高度轴；回缩只覆盖 HGHT，字号倍率 / 宽度 / 透明度不随 gShrink 改变。
+// 压扁下限为轴最小值 100（clampFloat 已在 variationAxes 内复核）。
+// 当 gFontHeight > 500 时，HGHT 轴固定为 500（最大值），超出部分用字号放大补充
+static CGFloat currentHeightAxis(void) {
+    CGFloat maxHeight = MIN(gFontHeight, 500.0); // HGHT 轴最大 500
+    return maxHeight + (100.0 - maxHeight) * gShrink;
+}
 static UIFont *currentClockFont(void) { return clockFontWithHeight(currentHeightAxis()); }
 
 // 计算目标收缩量：卡片顶部进入时钟下沿上方 220pt 避让带，越往上 t 越大
@@ -857,15 +870,9 @@ static void relayoutViews(void) {
     gBlurBackdrop.frame = gGlassHost.bounds;
     gTintView.frame = gGlassHost.bounds;
 
-    // 纵向缩放：
-    // 1. 基础高度：HGHT 轴最大 500（字体本身的极限，不变形）
-    // 2. 超过 500 的部分用 transform 补充（就像让系统认为分辨率很小，字体比例放大）
-    // 3. 回缩挤压：gShrink 0→1 时，从正常高度压缩到最小高度
-    CGFloat extraScale = fmax(0.0, (gFontHeight - 500.0) / 500.0 * 1.0); // 500-1000 对应 0-1.0 倍补充
-    CGFloat baseScaleY = 1.0 + extraScale;
-    CGFloat minScaleY = 100.0 / fmax(gFontHeight, 100.0); // gShrink=1 时，压缩到最小高度
-    CGFloat shrinkScaleY = 1.0 - gShrink * (1.0 - minScaleY); // 从 1.0 渐变到 minScaleY
-    CGFloat scaleY = baseScaleY * shrinkScaleY;
+    // 纵向缩放：去掉 transform 拉伸（会导致字体变形）
+    // 改用字体 HGHT 轴本身来控制高度，先确认轴效果
+    CGFloat scaleY = 1.0;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
     gGlassHost.transform = CGAffineTransformMakeScale(1.0, scaleY);
 
@@ -941,7 +948,7 @@ static void applyStyles(void) {
     gFontWeight   = clampFloat(readFloat(prefs, @"FontWeight", 400), 1, 1000);
     gSizeScale    = clampFloat(readFloat(prefs, @"SizeScale", 1.0), 0.5, 3.0);
     gFontWidth    = clampFloat(readFloat(prefs, @"FontWidth", 100), 60, 100);
-    gFontHeight   = clampFloat(readFloat(prefs, @"FontHeight", 100), 100, 500);
+    gFontHeight   = clampFloat(readFloat(prefs, @"FontHeight", 100), 100, 1000);
     gFontSoftness = clampFloat(readFloat(prefs, @"FontSoftness", 70), 0, 100);
 
     // 参数 / 开关刷新后复位避让动态状态，重新测量基准 frame（避免残留上一次收缩态）
