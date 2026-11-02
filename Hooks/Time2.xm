@@ -27,6 +27,8 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
+#import <Metal/Metal.h>
+#import <MetalKit/MetalKit.h>
 #import <math.h>
 #import <rootless.h>
 #import <substrate.h>
@@ -287,7 +289,7 @@ static UIFont *uifontFromCTFont(CTFontRef ct, CGFloat size) {
 static UIFont *clockFontWithHeight(CGFloat height) {
     // 自动调整字号：当高度 > 500 时，放大字号，同时收窄宽度（在 variationAxes 里处理）
     // 这样宽度保持不变，高度增加
-    CGFloat heightScale = MAX(1.0, gFontHeight / 500.0); // 500 以上才放大
+    CGFloat heightScale = fmax(1.0, gFontHeight / 500.0); // 500 以上才放大
     CGFloat size = kBaseClockSize * gSizeScale * heightScale;
 
     CTFontRef ct = buildCustomCTFont(kTime2BuiltinFontFile, size, height);
@@ -512,10 +514,8 @@ static UIView *findNativeAnchor(void) {
 
     UIView *common = commonAncestorOfChains(chains);
     UIView *anchor = nil;
-    // 优先挂在原生时间标签的 superview 上，这样图层位置更准确
-    if (timeLabel && timeLabel.superview) {
-        anchor = timeLabel.superview;
-    } else if (common && common.bounds.size.height >= screenH * 0.50) anchor = common;
+    // 挂在全屏的视图上，这样坐标系是全屏的，才能正确检测卡片位置
+    if (common && common.bounds.size.height >= screenH * 0.50) anchor = common;
     else if (timeLabel ?: firstLabel) anchor = fullscreenAncestor(timeLabel ?: firstLabel);
     if (anchor) anchor = visibleAnchor(anchor);
 
@@ -529,8 +529,9 @@ static UIView *findNativeAnchor(void) {
 
 // ===================== 自定义视图构建（字形磨砂：模糊 / 染色只落在笔画内，字体本身是磨砂玻璃质感） =====================
 static UIBlurEffectStyle thinBlurStyleForDark(BOOL dark) {
-    return dark ? UIBlurEffectStyleSystemUltraThinMaterialDark
-                : UIBlurEffectStyleSystemUltraThinMaterialLight;
+    // iOS 17 原生磨砂效果：用 Thick 材质，模糊更强
+    return dark ? UIBlurEffectStyleSystemThickMaterialDark
+                : UIBlurEffectStyleSystemThickMaterialLight;
 }
 
 static void ensureContainer(void) {
@@ -775,10 +776,46 @@ static void measureNearestCardTop(void) {
 // 压扁下限为轴最小值 100（clampFloat 已在 variationAxes 内复核）。
 // 当 gFontHeight > 500 时，HGHT 轴固定为 500（最大值），超出部分用字号放大补充
 static CGFloat currentHeightAxis(void) {
-    CGFloat maxHeight = MIN(gFontHeight, 500.0); // HGHT 轴最大 500
+    CGFloat maxHeight = fmin(gFontHeight, 500.0); // HGHT 轴最大 500
     return maxHeight + (100.0 - maxHeight) * gShrink;
 }
-static UIFont *currentClockFont(void) { return clockFontWithHeight(currentHeightAxis()); }
+
+// 字体缓存：只有当字体参数变化时才重新创建，避免卡顿
+static UIFont *gCachedClockFont = nil;
+static CGFloat gCachedFontHeight = -1;
+static CGFloat gCachedFontSize = -1;
+static CGFloat gCachedFontWeight = -1;
+static CGFloat gCachedFontWidth = -1;
+static CGFloat gCachedFontSoftness = -1;
+static CGFloat gCachedFontSizeScale = -1;
+
+static UIFont *currentClockFont(void) {
+    CGFloat height = currentHeightAxis();
+    CGFloat heightScale = fmax(1.0, gFontHeight / 500.0);
+    CGFloat size = kBaseClockSize * gSizeScale * heightScale;
+    
+    // 检查缓存是否有效
+    if (gCachedClockFont &&
+        gCachedFontHeight == height &&
+        gCachedFontSize == size &&
+        gCachedFontWeight == gFontWeight &&
+        gCachedFontWidth == gFontWidth &&
+        gCachedFontSoftness == gFontSoftness &&
+        gCachedFontSizeScale == gSizeScale) {
+        return gCachedClockFont;
+    }
+    
+    // 缓存无效，重新创建字体
+    UIFont *f = clockFontWithHeight(height);
+    gCachedClockFont = f;
+    gCachedFontHeight = height;
+    gCachedFontSize = size;
+    gCachedFontWeight = gFontWeight;
+    gCachedFontWidth = gFontWidth;
+    gCachedFontSoftness = gFontSoftness;
+    gCachedFontSizeScale = gSizeScale;
+    return f;
+}
 
 // 计算目标收缩量：卡片顶部进入时钟下沿上方 220pt 避让带，越往上 t 越大
 static void updateTargetShrink(void) {
@@ -903,11 +940,11 @@ static void relayoutViews(void) {
         return;
     }
 
-    // 染色层固定为白色磨砂玻璃效果，不管深浅模式
-    // 用户想要的是白色磨砂玻璃字体，不是黑色
+    // 染色层：iOS 17 原生磨砂效果，轻微的白色染色
     gTintView.alpha = gLightTint;
     gTintView.hidden = NO;
-    gTintView.backgroundColor = [UIColor whiteColor];
+    // 用带透明度的白色，模拟磨砂玻璃质感
+    gTintView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.1];
 }
 
 // ===================== 样式应用（必须主线程；从磁盘读盘只在这里与 DisplayLink 状态切换时调用） =====================
