@@ -35,7 +35,7 @@
 		</dict>
 		<dict>
 			<key>cell</key><string>PSSliderCell</string>
-			<key>label</key><string>时钟垂直偏移 (pt)</string>
+			<key>label</key><string>时钟垂直偏移</string>
 			<key>key</key><string>ClockVerticalOffset</string>
 			<key>default</key><real>0</real>
 			<key>min</key><real>-200</real>
@@ -43,13 +43,23 @@
 			<key>showValue</key><true/>
 		</dict>
 		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>上下移动时钟位置，正数向下，负数向上</string>
+			<key>action</key><string>noop:</string>
+		</dict>
+		<dict>
 			<key>cell</key><string>PSSliderCell</string>
-			<key>label</key><string>时钟水平偏移 (pt)</string>
+			<key>label</key><string>时钟水平偏移</string>
 			<key>key</key><string>ClockHorizontalOffset</string>
 			<key>default</key><real>0</real>
 			<key>min</key><real>-200</real>
 			<key>max</key><real>200</real>
 			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>左右移动时钟位置，正数向右，负数向左</string>
+			<key>action</key><string>noop:</string>
 		</dict>
 		<dict>
 			<key>cell</key><string>PSSliderCell</string>
@@ -59,6 +69,11 @@
 			<key>min</key><real>1</real>
 			<key>max</key><real>120</real>
 			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>时钟刷新帧率，60 足够流畅</string>
+			<key>action</key><string>noop:</string>
 		</dict>
 
 		<!-- 玻璃效果（主进程可近似项；玻璃厚度/折射系数/折射强度依赖 backboardd Metal，本版隐藏） -->
@@ -75,15 +90,6 @@
 		</dict>
 		<dict>
 			<key>cell</key><string>PSSliderCell</string>
-			<key>label</key><string>边缘宽度</string>
-			<key>key</key><string>BezelWidth</string>
-			<key>default</key><real>0.5</real>
-			<key>min</key><real>0</real>
-			<key>max</key><real>10</real>
-			<key>showValue</key><true/>
-		</dict>
-		<dict>
-			<key>cell</key><string>PSSliderCell</string>
 			<key>label</key><string>模糊强度</string>
 			<key>key</key><string>Blur</string>
 			<key>default</key><real>5.0</real>
@@ -92,8 +98,13 @@
 			<key>showValue</key><true/>
 		</dict>
 		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>笔画内部背景模糊程度，越大越模糊</string>
+			<key>action</key><string>noop:</string>
+		</dict>
+		<dict>
 			<key>cell</key><string>PSSliderCell</string>
-			<key>label</key><string>浅色染色</string>
+			<key>label</key><string>染色透明度</string>
 			<key>key</key><string>LightTintAlpha</string>
 			<key>default</key><real>0.10</real>
 			<key>min</key><real>0</real>
@@ -101,13 +112,9 @@
 			<key>showValue</key><true/>
 		</dict>
 		<dict>
-			<key>cell</key><string>PSSliderCell</string>
-			<key>label</key><string>深色染色</string>
-			<key>key</key><string>DarkTintAlpha</string>
-			<key>default</key><real>0.10</real>
-			<key>min</key><real>0</real>
-			<key>max</key><real>1</real>
-			<key>showValue</key><true/>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>白色染色层透明度，0=完全透明，1=完全不透明</string>
+			<key>action</key><string>noop:</string>
 		</dict>
 		<dict>
 			<key>cell</key><string>PSListItemsCell</string>
@@ -150,6 +157,11 @@
 			<key>showValue</key><true/>
 		</dict>
 		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>字体笔画粗细，越大约粗</string>
+			<key>action</key><string>noop:</string>
+		</dict>
+		<dict>
 			<key>cell</key><string>PSSliderCell</string>
 			<key>label</key><string>字体大小</string>
 			<key>key</key><string>SizeScale</string>
@@ -157,6 +169,11 @@
 			<key>min</key><real>0.5</real>
 			<key>max</key><real>3.0</real>
 			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>字体整体大小倍率</string>
+			<key>action</key><string>noop:</string>
 		</dict>
 		<dict>
 			<key>cell</key><string>PSSliderCell</string>
@@ -168,6 +185,11 @@
 			<key>showValue</key><true/>
 		</dict>
 		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>字体宽度，越小越窄，只能收窄不能拉宽</string>
+			<key>action</key><string>noop:</string>
+		</dict>
+		<dict>
 			<key>cell</key><string>PSSliderCell</string>
 			<key>label</key><string>字体高度</string>
 			<key>key</key><string>FontHeight</string>
@@ -177,6 +199,11 @@
 			<key>showValue</key><true/>
 		</dict>
 		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>字体纵向高度，越大越高越细长</string>
+			<key>action</key><string>noop:</string>
+		</dict>
+		<dict>
 			<key>cell</key><string>PSSliderCell</string>
 			<key>label</key><string>字体柔和</string>
 			<key>key</key><string>FontSoftness</string>
@@ -184,6 +211,11 @@
 			<key>min</key><real>0</real>
 			<key>max</key><real>100</real>
 			<key>showValue</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>字体笔画柔和度，越大越柔和</string>
+			<key>action</key><string>noop:</string>
 		</dict>
 
 		<!-- 回缩联动：通知 / 播放器卡片逼近时只下压字体高度轴把数字纵向压扁，不缩字号、不变淡、不移动位置；离开后高度轴平滑回弹（仿 iOS26 原生锁屏时间） -->
