@@ -1,0 +1,9 @@
+Package: com.xiaoyu.time2
+Name: 时间2 (Time2)
+Version: 1.0.0-1
+Architecture: iphoneos-arm64
+Description: 仿 iOS26 原生锁屏时间的字形磨砂大字时钟（按老版 BigTime 纯净口径裁剪）：隐藏系统原生时间、原生日期保留；固定内置 axs66 可变字体，粗细/宽度/高度/柔和走字体轴，字号=固定基准 × 大小倍率；模糊与染色只落在笔画内部不形成背景框；通知/播放器卡片逼近时只下压字体高度轴把数字纵向压扁，不缩字号、不变淡、不移动位置，离开后平滑回弹；设置实时生效；独立 rootless 插件。
+Maintainer: 小鱼 <xiaoyu@example.com>
+Author: 小鱼 <xiaoyu@example.com>
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000) | ellekit (>= 0.1), preferenceloader
