@@ -858,11 +858,9 @@ static void relayoutViews(void) {
     gTintView.frame = gGlassHost.bounds;
 
     // 纵向缩放：
-    // 1. 基础高度：HGHT 轴最大 500，超过 500 的部分用轻微 transform 补充
+    // 1. 基础高度：完全用 HGHT 轴本身，不用 transform 补充（不变形）
     // 2. 回缩挤压：gShrink 0→1 时，纵向压扁 30%（用 transform，不重新创建字体，不卡顿）
-    CGFloat hghtValue = MIN(gFontHeight, 500.0);
-    CGFloat extraScale = MAX(0.0, (gFontHeight - 500.0) / 500.0 * 0.5); // 500-1000 对应 0-0.5 倍补充
-    CGFloat baseScaleY = 1.0 + extraScale;
+    CGFloat baseScaleY = 1.0; // 完全靠 HGHT 轴，不用 transform 补充
     CGFloat shrinkScaleY = 1.0 - gShrink * 0.3; // gShrink=1 时压扁 30%
     CGFloat scaleY = baseScaleY * shrinkScaleY;
     gClockLabel.transform = CGAffineTransformMakeScale(1.0, scaleY);
