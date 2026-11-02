@@ -195,12 +195,12 @@
 			<key>key</key><string>FontHeight</string>
 			<key>default</key><real>100</real>
 			<key>min</key><real>100</real>
-			<key>max</key><real>300</real>
+			<key>max</key><real>1000</real>
 			<key>showValue</key><true/>
 		</dict>
 		<dict>
 			<key>cell</key><string>PSButtonCell</string>
-			<key>label</key><string>字体纵向高度，越大越高越细长（超过300会变形）</string>
+			<key>label</key><string>字体纵向高度，越大越高越细长（500以内是字体本身，500以上是比例放大）</string>
 			<key>action</key><string>noop:</string>
 		</dict>
 		<dict>
