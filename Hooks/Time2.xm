@@ -169,10 +169,8 @@ static UIView             *gContainer     = nil;  // 全屏容器（挂锚点，
 static UIView             *gGlassHost     = nil;  // 字形磨砂宿主（frame = 字形包围盒）
 static UIVisualEffectView *gBlurBackdrop = nil;  // 笔画内模糊层（layer.mask = 字形 mask）
 static UIView             *gTintView      = nil;  // 笔画内染色层（layer.mask = 字形 mask）
-static UIView             *gHighlightView = nil;  // 边缘高光层（模拟玻璃边缘折射）
 static CALayer            *gBlurMaskLayer = nil; // 模糊层字形遮罩
 static CALayer            *gTintMaskLayer  = nil;  // 染色层字形遮罩（两层不能共享同一 mask layer）
-static CALayer            *gHighlightMaskLayer = nil;  // 高光层字形遮罩
 static UILabel            *gClockLabel     = nil; // 最上层清晰时钟文字
 
 static BOOL      gLockVisible = NO;
@@ -573,21 +571,11 @@ static void ensureContainer(void) {
     gTintView.backgroundColor = [UIColor whiteColor];
     [gGlassHost addSubview:gTintView];
 
-    // 3.5) 边缘高光层：模拟玻璃边缘折射高光
-    gHighlightView = [[UIView alloc] init];
-    gHighlightView.userInteractionEnabled = NO;
-    gHighlightView.clipsToBounds = NO;
-    // 用轻微的白色渐变模拟边缘高光
-    gHighlightView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.05];
-    [gGlassHost addSubview:gHighlightView];
-
     // 4) 两个独立字形遮罩层（CALayer.mask 不能被两个 layer 共享）
     gBlurMaskLayer = [CALayer layer];
     gBlurMaskLayer.contentsGravity = kCAGravityResize;
     gTintMaskLayer = [CALayer layer];
     gTintMaskLayer.contentsGravity = kCAGravityResize;
-    gHighlightMaskLayer = [CALayer layer];
-    gHighlightMaskLayer.contentsGravity = kCAGravityResize;
 
     // 5) 时钟文字（最上层清晰）
     gClockLabel = [[UILabel alloc] init];
@@ -944,10 +932,8 @@ static void relayoutViews(void) {
         gTintMaskLayer.frame = gGlassHost.bounds;
         gBlurMaskLayer.contents = (__bridge id)maskImg.CGImage;
         gTintMaskLayer.contents = (__bridge id)maskImg.CGImage;
-        gHighlightMaskLayer.contents = (__bridge id)maskImg.CGImage;
         gBlurBackdrop.layer.mask = gBlurMaskLayer;
         gTintView.layer.mask = gTintMaskLayer;
-        gHighlightView.layer.mask = gHighlightMaskLayer;
     }
 
     // 回缩不改变透明度：玻璃模式下隐藏最上层清晰文字，只显示模糊+染色层；非玻璃模式显示清晰文字。
@@ -956,7 +942,6 @@ static void relayoutViews(void) {
         gClockLabel.hidden = YES;
         gBlurBackdrop.hidden = (gBlurRadius <= 0);
         gBlurBackdrop.alpha = (gBlurRadius <= 0) ? 0.0 : 1.0;
-        gHighlightView.hidden = NO;  // 显示边缘高光
     } else {
         // 清晰文字模式：隐藏玻璃层，只显示清晰文字
         gClockLabel.hidden = NO;
