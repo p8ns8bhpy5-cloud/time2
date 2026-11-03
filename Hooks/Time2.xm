@@ -993,7 +993,7 @@ static void applyStyles(void) {
     gFontWeight   = clampFloat(readFloat(prefs, @"FontWeight", 400), 1, 1000);
     gSizeScale    = clampFloat(readFloat(prefs, @"SizeScale", 1.0), 0.5, 3.0);
     gFontWidth    = clampFloat(readFloat(prefs, @"FontWidth", 100), 60, 100);
-    gFontHeight   = clampFloat(readFloat(prefs, @"FontHeight", 100), 100, 500);  // HGHT 轴最大 500
+    gFontHeight   = clampFloat(readFloat(prefs, @"FontHeight", 100), 100, 1000);
     gFontSoftness = clampFloat(readFloat(prefs, @"FontSoftness", 70), 0, 100);
 
     // 参数 / 开关刷新后复位避让动态状态，重新测量基准 frame（避免残留上一次收缩态）
