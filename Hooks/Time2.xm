@@ -224,7 +224,8 @@ static NSDictionary<NSNumber *, NSNumber *> *variationAxes(CGFloat height) {
     // 原理：字号变大 N 倍，wdth 轴收窄 N 倍，宽度 = 字号 × wdth 轴 保持不变
     CGFloat heightScale = fmax(1.0, gFontHeight / 500.0); // 500 以上才放大
     CGFloat autoWidth = gFontWidth / heightScale;
-    d[@(2003072104)] = @(clampFloat(autoWidth, 60, 100));             // wdth（只能收窄 60-100）
+    CGFloat clampedWidth = clampFloat(autoWidth, 60, 100);
+    d[@(2003072104)] = @(clampedWidth);             // wdth（只能收窄 60-100）
     
     d[@(1212631124)] = @(clampFloat(height, 100, 500));               // HGHT（正确轴标识符）
     d[@(1397704276)] = @(clampFloat(gFontSoftness, 0, 100));           // SOFT（正确轴标识符）
@@ -789,17 +790,25 @@ static CGFloat gCachedFontWidth = -1;
 static CGFloat gCachedFontSoftness = -1;
 static CGFloat gCachedFontSizeScale = -1;
 
+// 计算实际的 wdth 轴值（当 gFontHeight > 500 时自动收窄）
+static CGFloat actualWidthAxis(void) {
+    CGFloat heightScale = fmax(1.0, gFontHeight / 500.0);
+    CGFloat autoWidth = gFontWidth / heightScale;
+    return clampFloat(autoWidth, 60, 100);
+}
+
 static UIFont *currentClockFont(void) {
     CGFloat height = currentHeightAxis();
     CGFloat heightScale = fmax(1.0, gFontHeight / 500.0);
     CGFloat size = kBaseClockSize * gSizeScale * heightScale;
+    CGFloat actualWidth = actualWidthAxis();  // 实际的 wdth 轴值
     
-    // 检查缓存是否有效
+    // 检查缓存是否有效（检查实际的 wdth 轴值，而不是用户设置的 gFontWidth）
     if (gCachedClockFont &&
         gCachedFontHeight == height &&
         gCachedFontSize == size &&
         gCachedFontWeight == gFontWeight &&
-        gCachedFontWidth == gFontWidth &&
+        gCachedFontWidth == actualWidth &&
         gCachedFontSoftness == gFontSoftness &&
         gCachedFontSizeScale == gSizeScale) {
         return gCachedClockFont;
@@ -811,7 +820,7 @@ static UIFont *currentClockFont(void) {
     gCachedFontHeight = height;
     gCachedFontSize = size;
     gCachedFontWeight = gFontWeight;
-    gCachedFontWidth = gFontWidth;
+    gCachedFontWidth = actualWidth;  // 缓存实际的 wdth 轴值
     gCachedFontSoftness = gFontSoftness;
     gCachedFontSizeScale = gSizeScale;
     return f;
