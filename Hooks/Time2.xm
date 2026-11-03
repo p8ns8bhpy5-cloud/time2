@@ -219,14 +219,7 @@ static CFAbsoluteTime gLastCardScan = 0;             // 卡片测量节流时间
 static NSDictionary<NSNumber *, NSNumber *> *variationAxes(CGFloat height) {
     NSMutableDictionary<NSNumber *, NSNumber *> *d = [NSMutableDictionary dictionary];
     d[@(2003265652)] = @(clampFloat(gFontWeight, 1, 1000));           // wght
-    
-    // 自动调整 wdth 轴：当高度 > 500 时，收窄宽度，保持整体宽度不变
-    // 原理：字号变大 N 倍，wdth 轴收窄 N 倍，宽度 = 字号 × wdth 轴 保持不变
-    CGFloat heightScale = fmax(1.0, gFontHeight / 500.0); // 500 以上才放大
-    CGFloat autoWidth = gFontWidth / heightScale;
-    CGFloat clampedWidth = clampFloat(autoWidth, 60, 100);
-    d[@(2003072104)] = @(clampedWidth);             // wdth（只能收窄 60-100）
-    
+    d[@(2003072104)] = @(clampFloat(gFontWidth, 60, 100));             // wdth（用户自己控制）
     d[@(1212631124)] = @(clampFloat(height, 100, 500));               // HGHT（正确轴标识符）
     d[@(1397704276)] = @(clampFloat(gFontSoftness, 0, 100));           // SOFT（正确轴标识符）
     return d;
@@ -790,25 +783,17 @@ static CGFloat gCachedFontWidth = -1;
 static CGFloat gCachedFontSoftness = -1;
 static CGFloat gCachedFontSizeScale = -1;
 
-// 计算实际的 wdth 轴值（当 gFontHeight > 500 时自动收窄）
-static CGFloat actualWidthAxis(void) {
-    CGFloat heightScale = fmax(1.0, gFontHeight / 500.0);
-    CGFloat autoWidth = gFontWidth / heightScale;
-    return clampFloat(autoWidth, 60, 100);
-}
-
 static UIFont *currentClockFont(void) {
     CGFloat height = currentHeightAxis();
     CGFloat heightScale = fmax(1.0, gFontHeight / 500.0);
     CGFloat size = kBaseClockSize * gSizeScale * heightScale;
-    CGFloat actualWidth = actualWidthAxis();  // 实际的 wdth 轴值
     
-    // 检查缓存是否有效（检查实际的 wdth 轴值，而不是用户设置的 gFontWidth）
+    // 检查缓存是否有效
     if (gCachedClockFont &&
         gCachedFontHeight == height &&
         gCachedFontSize == size &&
         gCachedFontWeight == gFontWeight &&
-        gCachedFontWidth == actualWidth &&
+        gCachedFontWidth == gFontWidth &&
         gCachedFontSoftness == gFontSoftness &&
         gCachedFontSizeScale == gSizeScale) {
         return gCachedClockFont;
@@ -820,7 +805,7 @@ static UIFont *currentClockFont(void) {
     gCachedFontHeight = height;
     gCachedFontSize = size;
     gCachedFontWeight = gFontWeight;
-    gCachedFontWidth = actualWidth;  // 缓存实际的 wdth 轴值
+    gCachedFontWidth = gFontWidth;
     gCachedFontSoftness = gFontSoftness;
     gCachedFontSizeScale = gSizeScale;
     return f;
@@ -1008,7 +993,7 @@ static void applyStyles(void) {
     gFontWeight   = clampFloat(readFloat(prefs, @"FontWeight", 400), 1, 1000);
     gSizeScale    = clampFloat(readFloat(prefs, @"SizeScale", 1.0), 0.5, 3.0);
     gFontWidth    = clampFloat(readFloat(prefs, @"FontWidth", 100), 60, 100);
-    gFontHeight   = clampFloat(readFloat(prefs, @"FontHeight", 100), 100, 1000);
+    gFontHeight   = clampFloat(readFloat(prefs, @"FontHeight", 100), 100, 500);  // HGHT 轴最大 500
     gFontSoftness = clampFloat(readFloat(prefs, @"FontSoftness", 70), 0, 100);
 
     // 参数 / 开关刷新后复位避让动态状态，重新测量基准 frame（避免残留上一次收缩态）
